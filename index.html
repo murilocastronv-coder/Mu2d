@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>MU 2D Online</title>
+<style>
+:root{--sa-t:env(safe-area-inset-top,0px);--sa-b:env(safe-area-inset-bottom,0px);--sa-l:env(safe-area-inset-left,0px);--sa-r:env(safe-area-inset-right,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;background:#0c1a0c;font-family:system-ui,sans-serif;color:#fff;overflow:hidden;touch-action:none}
+#game{position:fixed;inset:0}
+#game canvas{image-rendering:pixelated}
+button{font:inherit;color:#fff;cursor:pointer}
+/* login */
+#login{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 30%,#2f6b2a,#0c1a0c 70%);padding:16px}
+.card{width:min(380px,100%);background:#1b2a1bee;border:2px solid #e0b84a;border-radius:14px;padding:18px;box-shadow:0 8px 40px #000a}
+.card h1{margin:0 0 4px;text-align:center;color:#ffd24a;font-size:28px;letter-spacing:2px;text-shadow:0 3px #000}
+.card p{margin:0 0 12px;text-align:center;font-size:13px;color:#bcd}
+.card input{width:100%;padding:12px;margin:5px 0;border-radius:8px;border:1px solid #567;background:#0d150d;color:#fff;font-size:16px;user-select:text;-webkit-user-select:text}
+.tabs{display:flex;gap:6px;margin-bottom:8px}
+.tabs button{flex:1;padding:10px;border-radius:8px;border:1px solid #567;background:#243524}
+.tabs button.on{background:#e0b84a;color:#000;font-weight:700}
+#classes{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}
+#classes button{padding:9px 4px;border-radius:8px;border:2px solid #456;background:#1d2d1d;font-size:13px}
+#classes button.on{border-color:#ffd24a;background:#3a4a1a}
+#go{width:100%;margin-top:8px;padding:14px;border:0;border-radius:10px;background:linear-gradient(#ffd24a,#d88a1a);color:#000;font-weight:800;font-size:17px}
+#err{color:#ff7a7a;text-align:center;min-height:18px;font-size:13px;margin-top:6px}
+/* hud */
+#hud{position:fixed;left:calc(8px + var(--sa-l));top:calc(8px + var(--sa-t));width:min(210px,42vw);z-index:10;pointer-events:none;font-size:12px;text-shadow:0 1px 2px #000}
+.bar{height:11px;background:#000a;border:1px solid #000;border-radius:3px;margin-top:3px;position:relative;overflow:hidden}
+.bar i{display:block;height:100%;width:0}
+#bhp i{background:#d83a3a}#bmp i{background:#3a7ae0}#bxp i{background:#d8b83a}
+.bar span{position:absolute;inset:0;text-align:center;font-size:9px;line-height:10px}
+#top{position:fixed;right:calc(8px + var(--sa-r));top:calc(8px + var(--sa-t));z-index:20;display:flex;gap:6px}
+#top button{min-width:52px;height:44px;border-radius:10px;border:2px solid #e0b84a;background:#1b2a1bdd;font-weight:700;font-size:12px}
+#chatlog{position:fixed;left:calc(8px + var(--sa-l));top:calc(92px + var(--sa-t));width:min(300px,48vw);max-height:110px;overflow:hidden;font-size:11px;line-height:1.3;z-index:10;pointer-events:none;text-shadow:0 1px 2px #000,0 0 3px #000}
+#chatbox{position:fixed;left:50%;top:calc(8px + var(--sa-t));transform:translateX(-50%);z-index:30;display:none;width:min(320px,50vw)}
+#chatbox input{width:100%;padding:10px;border-radius:8px;border:2px solid #e0b84a;background:#0d150dee;color:#fff;font-size:16px;user-select:text;-webkit-user-select:text}
+#boss{position:fixed;left:50%;top:calc(56px + var(--sa-t));transform:translateX(-50%);z-index:10;pointer-events:none;text-align:center;font-size:12px;width:min(260px,40vw);display:none;text-shadow:0 1px 2px #000}
+#boss .bar{height:14px}#boss i{background:#a02ad8}
+/* controls */
+#joy{position:fixed;left:calc(18px + var(--sa-l));bottom:calc(18px + var(--sa-b));width:128px;height:128px;border-radius:50%;background:#ffffff22;border:2px solid #ffffff55;z-index:15;touch-action:none}
+#knob{position:absolute;left:34px;top:34px;width:60px;height:60px;border-radius:50%;background:#ffffffaa;border:2px solid #fff}
+#btns{position:fixed;right:calc(14px + var(--sa-r));bottom:calc(14px + var(--sa-b));width:200px;height:170px;z-index:15;touch-action:none}
+#btns button{position:absolute;border-radius:50%;border:3px solid #fff8;background:#a02020cc;font-weight:800;touch-action:none}
+#bAtk{right:0;bottom:0;width:88px;height:88px;font-size:16px}
+#bSk{right:96px;bottom:6px;width:64px;height:64px;background:#6a2ab0cc!important;font-size:11px}
+#bHp{right:10px;bottom:98px;width:54px;height:54px;background:#b02a2acc!important;font-size:11px}
+#bMp{right:72px;bottom:80px;width:54px;height:54px;background:#2a52b0cc!important;font-size:11px}
+#bSk .cd{position:absolute;inset:0;border-radius:50%;background:#000a}
+/* inventário */
+#inv{position:fixed;z-index:25;display:none;left:50%;transform:translateX(-50%);top:calc(60px + var(--sa-t));bottom:calc(16px + var(--sa-b));width:min(360px,56vw);background:#14201ff2;border:2px solid #e0b84a;border-radius:12px;padding:10px;overflow:auto}
+@media (orientation:portrait){#inv{width:min(380px,94vw);bottom:calc(230px + var(--sa-b))}#btns{transform-origin:100% 100%}}
+#inv h3{margin:0 0 6px;font-size:14px;color:#ffd24a}
+#eq{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px}
+.sl{aspect-ratio:1;border:2px solid #456;border-radius:6px;background:#0d150d;font-size:9px;padding:2px;overflow:hidden;line-height:1.1}
+.sl.sel{border-color:#fff}
+#grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+#det{margin-top:8px;font-size:12px;min-height:60px}
+#det button{padding:9px 12px;margin:4px 4px 0 0;border-radius:8px;border:1px solid #e0b84a;background:#2a3a1a}
+.r0{color:#ddd}.r1{color:#5ab4ff}.r2{color:#c46bff}.r3{color:#ffb020}
+#msg{position:fixed;left:50%;top:40%;transform:translateX(-50%);z-index:40;font-size:22px;font-weight:800;text-shadow:0 2px 6px #000;display:none;text-align:center}
+#conn{position:fixed;inset:0;z-index:45;background:#000b;display:none;align-items:center;justify-content:center;font-size:18px}
+</style>
+</head>
+<body>
+<div id="game"></div>
+
+<div id="login"><div class="card">
+  <h1>MU 2D ONLINE</h1><p>MMORPG pixel art multijogador — Lorencia</p>
+  <div class="tabs"><button id="tL" class="on">Entrar</button><button id="tR">Criar conta</button></div>
+  <input id="u" placeholder="Usuário" maxlength="14" autocomplete="username" autocapitalize="off">
+  <input id="p" type="password" placeholder="Senha (mín. 6)" maxlength="64" autocomplete="current-password">
+  <div id="classes" style="display:none"></div>
+  <button id="go">ENTRAR</button><div id="err"></div>
+</div></div>
+
+<div id="hud"><div id="who" style="font-weight:700"></div>
+  <div class="bar" id="bhp"><i></i><span></span></div><div class="bar" id="bmp"><i></i><span></span></div><div class="bar" id="bxp"><i></i><span></span></div>
+  <div id="zen" style="margin-top:3px;color:#ffd24a"></div></div>
+<div id="boss"><div id="bossn"></div><div class="bar"><i id="bossb"></i></div></div>
+<div id="top"><button id="tInv">BAG</button><button id="tChat">CHAT</button><button id="tSnd">SOM</button></div>
+<div id="chatlog"></div>
+<div id="chatbox"><input id="chatin" maxlength="120" placeholder="Mensagem..." enterkeyhint="send"></div>
+<div id="joy"><div id="knob"></div></div>
+<div id="btns"><button id="bAtk">ATK</button><button id="bSk">SKILL<div class="cd" id="skcd" style="display:none"></div></button><button id="bHp">HP</button><button id="bMp">MP</button></div>
+<div id="inv"><h3>Personagem</h3><div id="stats" style="font-size:12px;margin-bottom:6px"></div><div id="eq"></div><h3>Inventário <span id="cnt"></span></h3><div id="grid"></div><div id="det"></div>
+  <div style="margin-top:6px"><button id="shHp" style="padding:8px;border-radius:8px;border:1px solid #567;background:#243524">Comprar Poção HP (20z)</button> <button id="shMp" style="padding:8px;border-radius:8px;border:1px solid #567;background:#243524">Poção MP (20z)</button></div></div>
+<div id="msg"></div><div id="conn">Reconectando...</div>
+
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

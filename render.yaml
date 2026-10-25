@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: mu2d-online
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: { name: mu2d-db, property: connectionString }
+      - key: XP_RATE
+        value: "1"
+      - key: DROP_RATE
+        value: "1"
+databases:
+  - name: mu2d-db
+    plan: free
