@@ -2,8 +2,8 @@
   "name": "mu2d-online",
   "version": "0.1.0",
   "description": "MMORPG 2D pixel art multijogador (Node.js + ws + PostgreSQL + Phaser 3)",
-  "main": "server/index.js",
-  "scripts": { "start": "node server/index.js", "dev": "node server/index.js" },
+  "main": "index.js",
+  "scripts": { "start": "node index.js", "dev": "node index.js" },
   "engines": { "node": ">=18" },
   "dependencies": { "express": "^4.19.2", "pg": "^8.12.0", "ws": "^8.18.0" }
 }
